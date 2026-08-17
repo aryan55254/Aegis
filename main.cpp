@@ -42,3 +42,34 @@ void free_all()
     current_offset = 0;
 }
 
+// can only rezise the last allocaton and only increase it not discrease it
+void *arena_resize(size_t old_size, void *old_memory, size_t new_size, size_t new_align)
+{
+
+    if (old_memory == NULL)
+    {
+        return arena_alloc(new_size, new_align);
+    }
+
+    if (new_size <= old_size)
+    {
+        return old_memory;
+    }
+
+    uintptr_t current_ptr = (uintptr_t)old_memory;
+
+    if (current_ptr + old_size == (uintptr_t)&arena_buffer[current_offset])
+    {
+        size_t size_diff = new_size - old_size;
+        if (current_offset + size_diff <= arena_buffer_length)
+        {
+            prev_offset = current_offset;
+            current_offset += size_diff;
+            void *ptr = (void *)current_ptr;
+            memset(ptr, 0, size_diff);
+            return ptr;
+        }
+        return nullptr;
+    }
+    return nullptr;
+}
