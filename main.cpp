@@ -6,7 +6,6 @@ static unsigned char static_memory[1024 * 1024];
 static unsigned char *arena_buffer = static_memory;
 static size_t arena_buffer_length = sizeof(static_memory);
 static size_t current_offset;
-static size_t prev_offset;
 
 // memory alignment must be by power of two (1 2 4 8 16...) so in this function we check if they are divisible and if not we align them for faster access
 static uintptr_t align_forward(uintptr_t ptr, size_t align)
@@ -26,7 +25,6 @@ void *arena_alloc(size_t size, size_t align = alignof(std::max_align_t))
 
     if (current_offset + padding + size <= arena_buffer_length)
     {
-        prev_offset = current_offset;
         current_offset += padding + size;
         void *ptr = (void *)aligned_ptr;
         memset(ptr, 0, size);
@@ -38,7 +36,6 @@ void *arena_alloc(size_t size, size_t align = alignof(std::max_align_t))
 
 void free_all()
 {
-    prev_offset = current_offset;
     current_offset = 0;
 }
 
@@ -63,7 +60,6 @@ void *arena_resize(size_t old_size, void *old_memory, size_t new_size, size_t ne
         size_t size_diff = new_size - old_size;
         if (current_offset + size_diff <= arena_buffer_length)
         {
-            prev_offset = current_offset;
             current_offset += size_diff;
             void *ptr = (void *)current_ptr;
             memset(ptr, 0, size_diff);
