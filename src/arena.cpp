@@ -1,14 +1,7 @@
-#include <cstddef>
-#include <cstring>
-#include <cstdint>
-
-static unsigned char static_memory[1024 * 1024];
-static unsigned char *arena_buffer = static_memory;
-static size_t arena_buffer_length = sizeof(static_memory);
-static size_t current_offset;
+#include "../include/arena.hpp"
 
 // memory alignment must be by power of two (1 2 4 8 16...) so in this function we check if they are divisible and if not we align them for faster access
-static uintptr_t align_forward(uintptr_t ptr, size_t align)
+uintptr_t Arena::align_forward(uintptr_t ptr, size_t align)
 {
     size_t remainder = ptr % align;
     if (remainder == 0)
@@ -16,7 +9,7 @@ static uintptr_t align_forward(uintptr_t ptr, size_t align)
     return ptr + (align - remainder);
 }
 
-void *arena_alloc(size_t size, size_t align = alignof(std::max_align_t))
+void *Arena::arena_alloc(size_t size, size_t align = alignof(std::max_align_t))
 {
     uintptr_t current_ptr = (uintptr_t)&arena_buffer[current_offset]; // we grab the pointer to the next available byte in the arena and convert it to an integer to perform arithmentic on it
     uintptr_t aligned_ptr = align_forward(current_ptr, align);        // aligns the pointer to nearest multiple of of align
@@ -34,13 +27,13 @@ void *arena_alloc(size_t size, size_t align = alignof(std::max_align_t))
     return nullptr;
 }
 
-void free_all()
+void Arena::free_all()
 {
     current_offset = 0;
 }
 
 // can only rezise the last allocaton and only increase it not discrease it
-void *arena_resize(size_t old_size, void *old_memory, size_t new_size, size_t new_align)
+void *Arena::arena_resize(size_t old_size, void *old_memory, size_t new_size, size_t new_align)
 {
 
     if (old_memory == NULL)

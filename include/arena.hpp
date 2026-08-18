@@ -1,0 +1,30 @@
+#pragma once
+
+#include <cstddef>
+#include <cstring>
+#include <cstdint>
+
+class Arena
+{
+private:
+    unsigned char *arena_buffer;
+    size_t arena_buffer_length;
+    size_t current_offset;
+
+public:
+    explicit Arena(size_t size) : arena_buffer(new unsigned char[size]), arena_buffer_length(size), current_offset(0) {}
+
+    ~Arena()
+    {
+        free_all();
+        delete[] arena_buffer;
+    }
+
+    void free_all();
+
+    static uintptr_t align_forward(uintptr_t ptr, size_t align);
+
+    void *arena_alloc(size_t size, size_t align = alignof(std::max_align_t));
+
+    void *arena_resize(size_t old_size, void *old_memory, size_t new_size, size_t new_align);
+};
