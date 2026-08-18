@@ -20,6 +20,23 @@ void *Arena::arena_alloc(size_t size, size_t align = alignof(std::max_align_t))
     {
         current_offset += padding + size;
         void *ptr = (void *)aligned_ptr;
+        return ptr;
+    }
+
+    return nullptr;
+}
+
+void *Arena::arena_alloc_zeroed(size_t size, size_t align = alignof(std::max_align_t))
+{
+    uintptr_t current_ptr = (uintptr_t)&arena_buffer[current_offset]; // we grab the pointer to the next available byte in the arena and convert it to an integer to perform arithmentic on it
+    uintptr_t aligned_ptr = align_forward(current_ptr, align);        // aligns the pointer to nearest multiple of of align
+
+    size_t padding = aligned_ptr - current_ptr; // calculates sacrifical bytes to align
+
+    if (current_offset + padding + size <= arena_buffer_length)
+    {
+        current_offset += padding + size;
+        void *ptr = (void *)aligned_ptr;
         memset(ptr, 0, size);
         return ptr;
     }
