@@ -77,4 +77,8 @@ public:
     void *arena_alloc_zeroed(size_t size, size_t align = alignof(std::max_align_t));
 
     void *arena_resize(size_t old_size, void *old_memory, size_t new_size, size_t new_align);
+
+    size_t capacity() const;
+
+    size_t offset() const;
 };

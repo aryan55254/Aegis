@@ -79,3 +79,13 @@ void *Arena::arena_resize(size_t old_size, void *old_memory, size_t new_size, si
     }
     return nullptr;
 }
+
+size_t Arena::capacity() const
+{
+    return arena_buffer_length;
+}
+
+size_t Arena::offset() const
+{
+    return current_offset;
+}
