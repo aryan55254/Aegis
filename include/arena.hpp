@@ -13,6 +13,9 @@ private:
     size_t current_offset;
 
 public:
+    Arena(const Arena &) = delete;            // not allow copy constructor : it will cause ownership errors
+    Arena &operator=(const Arena &) = delete; // not allow copy assignment : too wide of a scope to decide what exactly it should do in this case
+
     explicit Arena(size_t size)
     {
         if (size > 1024 * 1024)
