@@ -18,12 +18,10 @@ public:
 
     // allow move constructor , this allows the programmer to use constructor to move the arena instance resources they referreing to a new arena instance which is this new one
     Arena(Arena &&other) noexcept
+        : arena_buffer(other.arena_buffer),
+          arena_buffer_length(other.arena_buffer_length),
+          current_offset(other.current_offset)
     {
-        // move everything to the new instance
-        arena_buffer = other.arena_buffer;
-        arena_buffer_length = other.arena_buffer_length;
-        current_offset = other.current_offset;
-
         // empty the old instance
         other.arena_buffer = nullptr;
         other.arena_buffer_length = 0;
@@ -32,6 +30,11 @@ public:
     // allow move assignment , if someone uses std::move or something assignment operator backed this allows them to move the resources of the one they are referencing to this new instance but with everything same
     Arena &operator=(Arena &&other) noexcept
     {
+        // prevent self move
+        if (this == &other)
+        {
+            return *this;
+        };
         // clean up the destination instance
         delete[] this->arena_buffer;
 
@@ -49,14 +52,14 @@ public:
     };
 
     explicit Arena(size_t size)
+        : arena_buffer(new unsigned char[size]),
+          arena_buffer_length(size),
+          current_offset(0)
     {
         if (size > 1024 * 1024)
         {
             fmt::print("Allocations above 1MB not allowed as of now");
         }
-        arena_buffer = new unsigned char[size];
-        arena_buffer_length = size;
-        current_offset = 0;
     }
 
     ~Arena()

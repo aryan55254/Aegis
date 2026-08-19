@@ -7,8 +7,6 @@ what next :
 - alignment optimization 
 - arena growth arena - lot of chunks 
 - check point/ rollback 
-- Rule of Five: Prevent double-free crashes (= delete).
-- Initializer lists: Avoid double initialization overhead.
 - Constructor exceptions: Prevent invalid object states.
 -Move semantics: Transfer memory without copying.
 -Const correctness: Enforce read-only state safety.
