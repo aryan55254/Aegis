@@ -29,7 +29,7 @@ void *Arena::arena_alloc(size_t size, size_t align)
 }
 
 // in this we do the exact same shit as arena alloc but also makes sure all the memory has standard 0 stored in it by default via memset which is not done in fucntion above it still has random shit stored there but it doesn't matter coz when programmer use this memory the programmer will rewrite it anyways
-void *Arena::arena_alloc_zeroed(size_t size, size_t align = alignof(std::max_align_t))
+void *Arena::arena_alloc_zeroed(size_t size, size_t align)
 {
     uintptr_t current_ptr = (uintptr_t)&arena_buffer[current_offset];
     uintptr_t aligned_ptr = align_forward(current_ptr, align);
