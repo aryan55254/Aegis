@@ -906,8 +906,6 @@ This is important for a manual allocator because the implementation relies on ra
 
 ## Current Limitations
 
-AEGIS is intentionally small and specialized.
-
 Current limitations include:
 
 * the backing arena is fixed-size
@@ -925,8 +923,6 @@ These are design constraints rather than bugs in the arena model.
 
 ## Project Status
 
-AEGIS has reached a stable stopping point as a small arena allocator.
-
 The implementation has:
 
 * a complete basic arena allocation model
@@ -943,7 +939,3 @@ The implementation has:
 * benchmarks against `malloc()`
 * benchmarks against `calloc()`
 * benchmarks against `std::pmr::monotonic_buffer_resource`
-
-The project is intentionally being kept focused rather than being expanded into a general-purpose allocator.
-
-The benchmark results, tests, and limitations provide a concrete basis for evaluating the implementation and for future optimization work if AEGIS is revisited.
