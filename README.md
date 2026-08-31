@@ -133,7 +133,7 @@ The important part is that both `arena.cpp` and your program are compiled and li
 For example, from `benchmark/`:
 
 ```bash
-g++ -O2 arena_benchmark.cpp ../src/arena.cpp \
+g++ -O2 -flto arena_benchmark.cpp ../src/arena.cpp \
     -I../include -lfmt -o bench
 ```
 
@@ -481,15 +481,15 @@ The benchmark showed the expected behavior: zeroed allocation becomes increasing
 For example, in the fixed-batch benchmark, AEGIS zeroed allocation measured approximately:
 
 ```text
-64 B      5.52 ns
-128 B     5.10 ns
-256 B     8.08 ns
-512 B    12.20 ns
-1 KiB    19.48 ns
-4 KiB    70.21 ns
+64 B      3.24 ns
+128 B     3.59 ns
+256 B     6.92 ns
+512 B    11.95 ns
+1 KiB    19.56 ns
+4 KiB    74.54 ns
 ```
 
-The non-zeroed allocator stayed around roughly 5 ns per allocation across the same workload.
+The non-zeroed allocator stayed around roughly 1.7 to 1.9 ns per allocation across the same workload.
 
 ---
 
@@ -660,10 +660,10 @@ The allocation sizes tested were:
 
 The allocation result is passed through a `DoNotOptimize()` helper implemented with inline assembly so the compiler cannot simply eliminate the allocation result because it is never otherwise used.
 
-The benchmark is compiled with optimization enabled:
+The benchmark is compiled with optimization and link-time optimization enabled:
 
 ```bash
-g++ -O2 arena_benchmark.cpp ../src/arena.cpp \
+g++ -O2 -flto arena_benchmark.cpp ../src/arena.cpp \
     -I../include -lfmt -o bench
 ```
 
@@ -710,12 +710,12 @@ Representative results from the benchmark:
 
 | Allocation |    AEGIS |     malloc | AEGIS speed advantage |
 | ---------: | -------: | ---------: | --------------------: |
-|       64 B | ~5.56 ns |   ~8.83 ns |                ~1.59× |
-|      128 B | ~5.44 ns |  ~14.90 ns |                ~2.74× |
-|      256 B | ~5.10 ns |  ~15.24 ns |                ~2.99× |
-|      512 B | ~5.39 ns |  ~15.53 ns |                ~2.88× |
-|      1 KiB | ~5.51 ns | ~123.09 ns |               ~22.32× |
-|      4 KiB | ~5.96 ns | ~684.73 ns |              ~114.82× |
+|       64 B | ~1.78 ns |   ~9.32 ns |                ~5.25× |
+|      128 B | ~1.77 ns |  ~18.93 ns |               ~10.68× |
+|      256 B | ~1.83 ns |  ~16.26 ns |                ~8.88× |
+|      512 B | ~1.74 ns |  ~16.96 ns |                ~9.72× |
+|      1 KiB | ~1.73 ns | ~132.75 ns |               ~76.82× |
+|      4 KiB | ~1.73 ns | ~752.87 ns |              ~434.75× |
 
 These numbers are workload- and machine-specific.
 
@@ -733,12 +733,12 @@ Representative results:
 
 | Allocation | AEGIS zeroed |     calloc | AEGIS speed advantage |
 | ---------: | -----------: | ---------: | --------------------: |
-|       64 B |     ~5.75 ns |  ~10.52 ns |                ~1.83× |
-|      128 B |     ~6.36 ns |  ~15.98 ns |                ~2.52× |
-|      256 B |     ~9.31 ns |  ~20.78 ns |                ~2.23× |
-|      512 B |    ~12.58 ns |  ~36.04 ns |                ~2.86× |
-|      1 KiB |    ~20.15 ns | ~143.70 ns |                ~7.13× |
-|      4 KiB |    ~69.65 ns | ~727.67 ns |               ~10.45× |
+|       64 B |     ~3.24 ns |  ~11.78 ns |                ~3.64× |
+|      128 B |     ~3.59 ns |  ~18.71 ns |                ~5.21× |
+|      256 B |     ~6.92 ns |  ~21.81 ns |                ~3.15× |
+|      512 B |    ~11.95 ns |  ~38.17 ns |                ~3.19× |
+|      1 KiB |    ~19.56 ns | ~148.55 ns |                ~7.60× |
+|      4 KiB |    ~74.54 ns | ~783.60 ns |               ~10.51× |
 
 The increasing AEGIS cost is expected: `arena_alloc_zeroed()` has to write the requested memory.
 
@@ -769,12 +769,12 @@ Representative results:
 
 | Allocation |    AEGIS |      PMR | AEGIS as % of PMR |
 | ---------: | -------: | -------: | ----------------: |
-|       64 B | ~6.27 ns | ~0.92 ns |            ~14.6% |
-|      128 B | ~6.05 ns | ~0.92 ns |            ~15.2% |
-|      256 B | ~6.85 ns | ~0.92 ns |            ~13.5% |
-|      512 B | ~5.96 ns | ~0.90 ns |            ~15.2% |
-|      1 KiB | ~6.33 ns | ~0.90 ns |            ~14.2% |
-|      4 KiB | ~6.24 ns | ~0.99 ns |            ~15.9% |
+|       64 B | ~1.88 ns | ~1.50 ns |            ~79.7% |
+|      128 B | ~1.87 ns | ~1.50 ns |            ~80.3% |
+|      256 B | ~1.87 ns | ~1.50 ns |            ~80.4% |
+|      512 B | ~1.74 ns | ~1.01 ns |            ~58.0% |
+|      1 KiB | ~1.74 ns | ~1.12 ns |            ~64.6% |
+|      4 KiB | ~1.87 ns | ~1.50 ns |            ~80.0% |
 
 Under this particular benchmark, PMR is substantially faster.
 
