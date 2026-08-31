@@ -709,13 +709,13 @@ AEGIS was compared against the system `malloc()` using the same fixed-batch work
 Representative results from the benchmark:
 
 | Allocation |    AEGIS |     malloc | malloc speedup |
-| ---------: | -------: | ---------: | --------------: |
-|       64 B | ~1.78 ns |   ~9.32 ns |          ~5.24× |
-|      128 B | ~1.77 ns |  ~18.93 ns |         ~10.69× |
-|      256 B | ~1.83 ns |  ~16.26 ns |          ~8.89× |
-|      512 B | ~1.74 ns |  ~16.96 ns |          ~9.75× |
-|      1 KiB | ~1.73 ns | ~132.75 ns |         ~76.73× |
-|      4 KiB | ~1.73 ns | ~752.87 ns |        ~435.19× |
+| ---------: | -------: | ---------: | -------------: |
+|       64 B | 2.269 ns |   8.622 ns |         3.799× |
+|      128 B | 1.706 ns |  15.087 ns |         8.842× |
+|      256 B | 1.587 ns |  15.160 ns |         9.554× |
+|      512 B | 1.635 ns |  15.360 ns |         9.393× |
+|      1 KiB | 1.595 ns | 124.605 ns |        78.115× |
+|      4 KiB | 1.798 ns | 722.139 ns |       401.673× |
 
 These numbers are workload- and machine-specific.
 
@@ -733,16 +733,18 @@ Representative results:
 
 | Allocation | AEGIS zeroed |     calloc | calloc speedup |
 | ---------: | -----------: | ---------: | -------------: |
-|       64 B |     ~3.24 ns |  ~11.78 ns |          ~3.64× |
-|      128 B |     ~3.59 ns |  ~18.71 ns |          ~5.21× |
-|      256 B |     ~6.92 ns |  ~21.81 ns |          ~3.15× |
-|      512 B |    ~11.95 ns |  ~38.17 ns |          ~3.19× |
-|      1 KiB |    ~19.56 ns | ~148.55 ns |          ~7.60× |
-|      4 KiB |    ~74.54 ns | ~783.60 ns |         ~10.51× |
+|       64 B |     2.612 ns |  10.332 ns |         3.956× |
+|      128 B |     2.308 ns |  15.859 ns |         6.871× |
+|      256 B |     6.386 ns |  19.532 ns |         3.059× |
+|      512 B |    11.343 ns |  36.065 ns |         3.179× |
+|      1 KiB |    18.135 ns | 141.619 ns |         7.809× |
+|      4 KiB |    68.328 ns | 725.220 ns |        10.614× |
 
 The increasing AEGIS cost is expected: `arena_alloc_zeroed()` has to write the requested memory.
 
-This benchmark is specifically useful because it separates the cost of simply advancing the arena from the cost of initializing the returned memory.
+This benchmark separates the cost of advancing the arena from the additional cost of initializing the returned memory.
+
+The results also show that the advantage over `calloc()` remains substantial even when AEGIS is required to zero the allocation.
 
 ---
 
@@ -767,16 +769,56 @@ This makes the comparison a fixed-buffer monotonic-arena comparison rather than 
 
 Representative results:
 
-| Allocation |    AEGIS |      PMR | PMR speedup |
-| ---------: | -------: | -------: | ----------: |
-|       64 B | ~1.88 ns | ~1.50 ns |      ~1.25× |
-|      128 B | ~1.87 ns | ~1.50 ns |      ~1.25× |
-|      256 B | ~1.87 ns | ~1.50 ns |      ~1.25× |
-|      512 B | ~1.74 ns | ~1.01 ns |      ~1.72× |
-|      1 KiB | ~1.74 ns | ~1.12 ns |      ~1.55× |
-|      4 KiB | ~1.87 ns | ~1.50 ns |      ~1.25× |
+| Allocation |    AEGIS |      PMR | PMR speedup | AEGIS/PMR |
+| ---------: | -------: | -------: | ----------: | --------: |
+|       64 B | 2.382 ns | 0.935 ns |      2.547× |   39.257% |
+|      128 B | 1.773 ns | 0.904 ns |      1.961× |   50.992% |
+|      256 B | 1.707 ns | 1.503 ns |      1.135× |   88.071% |
+|      512 B | 1.667 ns | 0.940 ns |      1.773× |   56.413% |
+|      1 KiB | 1.623 ns | 0.997 ns |      1.628× |   61.407% |
+|      4 KiB | 1.667 ns | 0.942 ns |      1.769× |   56.530% |
 
-Under this particular benchmark, PMR is faster than AEGIS, with PMR requiring approximately 58–80% of AEGIS's per-allocation time depending on allocation size.
+Under this particular benchmark, PMR is faster than AEGIS across all tested allocation sizes.
+
+AEGIS reaches between approximately **39% and 88% of PMR's per-allocation performance**, depending on allocation size.
+
+The gap is smallest at 256 bytes, where AEGIS measures 1.707 ns/allocation versus PMR's 1.503 ns/allocation.
+
+This is a controlled benchmark rather than a universal ranking of allocators. `std::pmr::monotonic_buffer_resource` is a mature, highly optimized standard-library implementation, making it a useful reference point for evaluating AEGIS.
+
+---
+
+## Benchmark Configuration
+
+The final comparison benchmarks were compiled with:
+
+```bash
+g++ -O2 -flto
+```
+
+The fixed-batch comparisons used:
+
+```text
+Total allocations : 10,000,128
+Allocations/batch  : 256
+Batches            : 39,063
+Arena capacity     : 1 MiB
+```
+
+The allocation sizes tested were:
+
+```text
+64 B
+128 B
+256 B
+512 B
+1 KiB
+4 KiB
+```
+
+The fixed-batch AEGIS benchmark measured approximately **1.46–1.78 ns/allocation** across the tested sizes for non-zeroed allocation.
+
+The zeroed benchmark shows the expected increase in cost as allocation size grows, reaching approximately **69 ns/allocation at 4 KiB**.
 
 ---
 
