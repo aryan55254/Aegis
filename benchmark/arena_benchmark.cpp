@@ -1,4 +1,4 @@
-#include <arena.hpp>
+#include "../include/arena.hpp"
 
 #include <chrono>
 #include <iomanip>

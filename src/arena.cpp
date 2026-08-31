@@ -9,7 +9,7 @@ uintptr_t Arena::align_forward(uintptr_t ptr, size_t align)
     return ptr + (align - remainder);
 }
 
-void *Arena::arena_alloc(size_t size, size_t align = alignof(std::max_align_t))
+void *Arena::arena_alloc(size_t size, size_t align)
 {
     uintptr_t current_ptr = (uintptr_t)&arena_buffer[current_offset]; // we grab the pointer to the next available byte in the arena and convert it to an integer to perform arithmentic on it
     uintptr_t aligned_ptr = align_forward(current_ptr, align);        // aligns the pointer to nearest multiple of of align
