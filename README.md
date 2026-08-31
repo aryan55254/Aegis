@@ -708,14 +708,14 @@ AEGIS was compared against the system `malloc()` using the same fixed-batch work
 
 Representative results from the benchmark:
 
-| Allocation |    AEGIS |     malloc | AEGIS speed advantage |
-| ---------: | -------: | ---------: | --------------------: |
-|       64 B | ~1.78 ns |   ~9.32 ns |                ~5.25× |
-|      128 B | ~1.77 ns |  ~18.93 ns |               ~10.68× |
-|      256 B | ~1.83 ns |  ~16.26 ns |                ~8.88× |
-|      512 B | ~1.74 ns |  ~16.96 ns |                ~9.72× |
-|      1 KiB | ~1.73 ns | ~132.75 ns |               ~76.82× |
-|      4 KiB | ~1.73 ns | ~752.87 ns |              ~434.75× |
+| Allocation |    AEGIS |     malloc | malloc speedup |
+| ---------: | -------: | ---------: | --------------: |
+|       64 B | ~1.78 ns |   ~9.32 ns |          ~5.24× |
+|      128 B | ~1.77 ns |  ~18.93 ns |         ~10.69× |
+|      256 B | ~1.83 ns |  ~16.26 ns |          ~8.89× |
+|      512 B | ~1.74 ns |  ~16.96 ns |          ~9.75× |
+|      1 KiB | ~1.73 ns | ~132.75 ns |         ~76.73× |
+|      4 KiB | ~1.73 ns | ~752.87 ns |        ~435.19× |
 
 These numbers are workload- and machine-specific.
 
@@ -731,14 +731,14 @@ Zeroed allocation was compared against `calloc()` using the same fixed-batch met
 
 Representative results:
 
-| Allocation | AEGIS zeroed |     calloc | AEGIS speed advantage |
-| ---------: | -----------: | ---------: | --------------------: |
-|       64 B |     ~3.24 ns |  ~11.78 ns |                ~3.64× |
-|      128 B |     ~3.59 ns |  ~18.71 ns |                ~5.21× |
-|      256 B |     ~6.92 ns |  ~21.81 ns |                ~3.15× |
-|      512 B |    ~11.95 ns |  ~38.17 ns |                ~3.19× |
-|      1 KiB |    ~19.56 ns | ~148.55 ns |                ~7.60× |
-|      4 KiB |    ~74.54 ns | ~783.60 ns |               ~10.51× |
+| Allocation | AEGIS zeroed |     calloc | calloc speedup |
+| ---------: | -----------: | ---------: | -------------: |
+|       64 B |     ~3.24 ns |  ~11.78 ns |          ~3.64× |
+|      128 B |     ~3.59 ns |  ~18.71 ns |          ~5.21× |
+|      256 B |     ~6.92 ns |  ~21.81 ns |          ~3.15× |
+|      512 B |    ~11.95 ns |  ~38.17 ns |          ~3.19× |
+|      1 KiB |    ~19.56 ns | ~148.55 ns |          ~7.60× |
+|      4 KiB |    ~74.54 ns | ~783.60 ns |         ~10.51× |
 
 The increasing AEGIS cost is expected: `arena_alloc_zeroed()` has to write the requested memory.
 
@@ -767,20 +767,16 @@ This makes the comparison a fixed-buffer monotonic-arena comparison rather than 
 
 Representative results:
 
-| Allocation |    AEGIS |      PMR | AEGIS as % of PMR |
-| ---------: | -------: | -------: | ----------------: |
-|       64 B | ~1.88 ns | ~1.50 ns |            ~79.7% |
-|      128 B | ~1.87 ns | ~1.50 ns |            ~80.3% |
-|      256 B | ~1.87 ns | ~1.50 ns |            ~80.4% |
-|      512 B | ~1.74 ns | ~1.01 ns |            ~58.0% |
-|      1 KiB | ~1.74 ns | ~1.12 ns |            ~64.6% |
-|      4 KiB | ~1.87 ns | ~1.50 ns |            ~80.0% |
+| Allocation |    AEGIS |      PMR | PMR speedup |
+| ---------: | -------: | -------: | ----------: |
+|       64 B | ~1.88 ns | ~1.50 ns |      ~1.25× |
+|      128 B | ~1.87 ns | ~1.50 ns |      ~1.25× |
+|      256 B | ~1.87 ns | ~1.50 ns |      ~1.25× |
+|      512 B | ~1.74 ns | ~1.01 ns |      ~1.72× |
+|      1 KiB | ~1.74 ns | ~1.12 ns |      ~1.55× |
+|      4 KiB | ~1.87 ns | ~1.50 ns |      ~1.25× |
 
-Under this particular benchmark, PMR is substantially faster.
-
-This is useful information rather than a failure of the project: it demonstrates that a mature standard-library monotonic resource has a highly optimized hot path.
-
-The benchmark should be treated as a controlled workload comparison, not a universal ranking of allocators.
+Under this particular benchmark, PMR is faster than AEGIS, with PMR requiring approximately 58–80% of AEGIS's per-allocation time depending on allocation size.
 
 ---
 
