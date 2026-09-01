@@ -1,4 +1,4 @@
-#include "../include/arena.hpp"
+#include "arena.hpp"
 
 // memory alignment must be by power of two (1 2 4 8 16...) so in this function we check if they are divisible and if not we align them for faster access
 uintptr_t Arena::align_forward(uintptr_t ptr, size_t align)

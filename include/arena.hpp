@@ -1,13 +1,14 @@
 #pragma once
-
+#include <stdexcept>
 #include <cstddef>
 #include <cstring>
 #include <cstdint>
-#include <fmt/core.h>
 
 class Arena
 {
 private:
+    static constexpr size_t MAX_ARENA_SIZE = 16 * 1024 * 1024;
+
     unsigned char *arena_buffer;
     size_t arena_buffer_length;
     size_t current_offset;
@@ -60,10 +61,13 @@ public:
           arena_buffer_length(size),
           current_offset(0)
     {
-        if (size > 1024 * 1024)
+        if (size > MAX_ARENA_SIZE)
         {
-            fmt::print("Allocations above 1MB not allowed as of now");
+            throw std::invalid_argument("Arena size exceeds maximum capacity");
         }
+
+        arena_buffer = new unsigned char[size];
+        arena_buffer_length = size;
     }
 
     // destructor
